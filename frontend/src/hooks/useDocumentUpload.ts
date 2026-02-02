@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { uploadDocument, getDocumentStatus } from '../services/api';
 import { useMindMapStore } from '../store/mindMapStore';
@@ -8,10 +8,15 @@ export function useDocumentUpload() {
   const [uploadedDocument, setUploadedDocument] = useState<Document | null>(null);
   const { setDocument } = useMindMapStore();
 
+  // Track if we've already set the document to prevent multiple calls
+  const hasSetDocument = useRef(false);
+
   const uploadMutation = useMutation({
     mutationFn: uploadDocument,
     onSuccess: (document) => {
       setUploadedDocument(document);
+      // Reset the flag for new uploads
+      hasSetDocument.current = false;
     },
   });
 
@@ -29,10 +34,13 @@ export function useDocumentUpload() {
     },
   });
 
-  // Update document when status changes
-  if (status?.status === 'completed' && uploadedDocument) {
-    setDocument({ ...uploadedDocument, status: 'completed' });
-  }
+  // Update document when status changes - use useEffect to avoid side effects during render
+  useEffect(() => {
+    if (status?.status === 'completed' && uploadedDocument && !hasSetDocument.current) {
+      hasSetDocument.current = true;
+      setDocument({ ...uploadedDocument, status: 'completed' });
+    }
+  }, [status?.status, uploadedDocument, setDocument]);
 
   const handleUpload = useCallback(
     async (file: File) => {

@@ -30,6 +30,8 @@ export function useMindMap(documentId: string | null) {
   } = useMindMapStore();
 
   // Convert MindMapNodes to React Flow nodes and edges
+  // Note: We don't include expandedNodes, loadingNodes, or selectedNodeId here
+  // Those are added in MindMapCanvas to avoid circular updates
   const updateFlowElements = useCallback(
     (nodes: MindMapNode[]) => {
       const newFlowNodes: Node[] = nodes.map((node) => ({
@@ -38,9 +40,6 @@ export function useMindMap(documentId: string | null) {
         position: { x: node.position_x, y: node.position_y },
         data: {
           ...node,
-          isExpanded: expandedNodes.has(node.id),
-          isLoading: loadingNodes.has(node.id),
-          isSelected: node.id === selectedNodeId,
           color: NODE_TYPE_COLORS[node.node_type] || '#6b7280',
         } as Record<string, unknown>,
       }));
@@ -59,7 +58,7 @@ export function useMindMap(documentId: string | null) {
       setFlowNodes(newFlowNodes);
       setFlowEdges(newFlowEdges);
     },
-    [expandedNodes, loadingNodes, selectedNodeId, setFlowNodes, setFlowEdges]
+    [setFlowNodes, setFlowEdges]
   );
 
   // Fetch initial mind-map

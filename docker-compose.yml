@@ -10,6 +10,7 @@ services:
       - DEBUG=false
     volumes:
       - uploads:/app/uploads
+      - documents:/app/documents
     restart: unless-stopped
 
   frontend:
@@ -22,3 +23,4 @@ services:
 
 volumes:
   uploads:
+  documents:

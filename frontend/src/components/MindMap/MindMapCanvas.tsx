@@ -38,8 +38,20 @@ export function MindMapCanvas({ documentId }: MindMapCanvasProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([] as Node[]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([] as Edge[]);
 
+  // Store handlers in refs to avoid dependency changes
+  const handleNodeExpandRef = useCallback(
+    (nodeId: string) => handleNodeExpand(nodeId),
+    [handleNodeExpand]
+  );
+  const handleNodeClickRef = useCallback(
+    (nodeId: string) => handleNodeClick(nodeId),
+    [handleNodeClick]
+  );
+
   // Update nodes with handlers and state
   useEffect(() => {
+    if (flowNodes.length === 0) return;
+
     const updatedNodes: Node[] = flowNodes.map((node) => ({
       ...node,
       data: {
@@ -47,24 +59,18 @@ export function MindMapCanvas({ documentId }: MindMapCanvasProps) {
         isExpanded: expandedNodes.has(node.id),
         isLoading: loadingNodes.has(node.id),
         isSelected: node.id === selectedNodeId,
-        onExpand: handleNodeExpand,
-        onClick: handleNodeClick,
+        onExpand: handleNodeExpandRef,
+        onClick: handleNodeClickRef,
       },
     }));
     setNodes(updatedNodes);
-  }, [
-    flowNodes,
-    expandedNodes,
-    loadingNodes,
-    selectedNodeId,
-    handleNodeExpand,
-    handleNodeClick,
-    setNodes,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flowNodes, expandedNodes, loadingNodes, selectedNodeId]);
 
   useEffect(() => {
     setEdges(flowEdges);
-  }, [flowEdges, setEdges]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flowEdges]);
 
   // Custom node types - use type assertion to satisfy NodeTypes
   const nodeTypes: NodeTypes = useMemo(

@@ -49,3 +49,20 @@ class DocumentStatusResponse(BaseModel):
     status: ProcessingStatus
     error_message: Optional[str] = None
     progress: Optional[float] = None
+
+
+class DocumentListItem(BaseModel):
+    """Summary of a persisted document for listing."""
+    content_hash: str
+    document_id: Optional[str] = None
+    original_filename: str
+    page_count: int
+    created_at: str
+    last_modified: str
+
+
+class AuditEntryResponse(BaseModel):
+    """Audit log entry for API responses."""
+    timestamp: str
+    action: str
+    details: dict
