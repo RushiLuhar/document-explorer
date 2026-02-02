@@ -31,6 +31,13 @@ Proof of Concept phase using `claudes-constitution.pdf` as the sample document.
 - Keep the UI focused on exploration and discovery
 - Prioritize the PoC with the constitution document before generalizing
 
+## Testing Requirements
+
+- All bug fixes and new features must include test cases
+- Backend tests use pytest: `cd backend && pytest`
+- Frontend tests use vitest: `cd frontend && npm test`
+- Security-related changes require explicit test coverage for the vulnerability being addressed
+
 ## Sample Document
 
 The `claudes-constitution.pdf` is Anthropic's detailed description of Claude's values, behavior guidelines, and design principles. It contains well-structured sections making it ideal for mind-map visualization:

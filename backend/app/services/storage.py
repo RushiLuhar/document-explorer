@@ -7,6 +7,7 @@ avoiding the need to reprocess documents on server restart.
 
 import hashlib
 import json
+import re
 import shutil
 from dataclasses import dataclass
 from datetime import datetime
@@ -84,8 +85,25 @@ class DocumentStorage:
         if not gitkeep.exists():
             gitkeep.touch()
 
+    def _validate_content_hash(self, content_hash: str) -> None:
+        """
+        Validate that content_hash is in the expected format.
+
+        Prevents path traversal attacks by ensuring the hash contains
+        only hexadecimal characters and is exactly 16 characters long.
+
+        Args:
+            content_hash: The hash to validate
+
+        Raises:
+            ValueError: If the hash format is invalid
+        """
+        if not re.match(r'^[a-f0-9]{16}$', content_hash):
+            raise ValueError(f"Invalid content hash format: {content_hash}")
+
     def _get_document_folder(self, content_hash: str) -> Path:
         """Get the folder path for a document by its content hash."""
+        self._validate_content_hash(content_hash)
         return self.documents_dir / content_hash
 
     def compute_content_hash(self, file_path: Path) -> str:
