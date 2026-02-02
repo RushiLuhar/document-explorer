@@ -1,15 +1,19 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDocumentUpload } from '../../hooks/useDocumentUpload';
 
 interface DocumentUploadProps {
-  onDocumentReady: (documentId: string) => void;
+  onDocumentReady: (documentId: string, contentHash?: string) => void;
+  onBack?: () => void;
 }
 
-export function DocumentUpload({ onDocumentReady }: DocumentUploadProps) {
+export function DocumentUpload({ onDocumentReady, onBack }: DocumentUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const { uploadedDocument, status, isUploading, uploadError, handleUpload } =
     useDocumentUpload();
+
+  // Track if we've already called onDocumentReady to prevent multiple calls
+  const hasCalledOnReady = useRef(false);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -35,10 +39,13 @@ export function DocumentUpload({ onDocumentReady }: DocumentUploadProps) {
     [handleUpload]
   );
 
-  // Check if processing is complete
-  if (status?.status === 'completed' && uploadedDocument) {
-    onDocumentReady(uploadedDocument.id);
-  }
+  // Handle document ready in useEffect to avoid side effects during render
+  useEffect(() => {
+    if (status?.status === 'completed' && uploadedDocument && !hasCalledOnReady.current) {
+      hasCalledOnReady.current = true;
+      onDocumentReady(uploadedDocument.id);
+    }
+  }, [status?.status, uploadedDocument, onDocumentReady]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
@@ -47,13 +54,38 @@ export function DocumentUpload({ onDocumentReady }: DocumentUploadProps) {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-xl"
       >
+        {/* Back button */}
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="mb-6 flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
+            Back to Documents
+          </button>
+        )}
+
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-800 mb-2">
-            Claude Constitution Explorer
+            {onBack ? 'Upload New Document' : 'Document Explorer'}
           </h1>
           <p className="text-slate-600">
-            Transform documents into interactive mind-maps
+            {onBack
+              ? 'Add another document to explore'
+              : 'Transform documents into interactive mind-maps'}
           </p>
         </div>
 
@@ -154,9 +186,11 @@ export function DocumentUpload({ onDocumentReady }: DocumentUploadProps) {
         )}
 
         {/* Sample document hint */}
-        <p className="text-center text-sm text-slate-500 mt-6">
-          Try uploading "claudes-constitution.pdf" to explore Claude's values
-        </p>
+        {!onBack && (
+          <p className="text-center text-sm text-slate-500 mt-6">
+            Try uploading "claudes-constitution.pdf" to explore Claude's values
+          </p>
+        )}
       </motion.div>
     </div>
   );

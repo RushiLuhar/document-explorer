@@ -68,3 +68,18 @@ export interface WebSearchResponse {
   query: string;
   results: WebSearchResult[];
 }
+
+export interface DocumentListItem {
+  content_hash: string;
+  document_id: string | null;
+  original_filename: string;
+  page_count: number;
+  created_at: string;
+  last_modified: string;
+}
+
+export interface AuditEntry {
+  timestamp: string;
+  action: string;
+  details: Record<string, unknown>;
+}

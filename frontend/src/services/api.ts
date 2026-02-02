@@ -2,6 +2,8 @@ import axios from 'axios';
 import type {
   Document,
   DocumentStatus,
+  DocumentListItem,
+  AuditEntry,
   MindMapResponse,
   MindMapNode,
   NodeExpandResponse,
@@ -94,6 +96,26 @@ export const searchWeb = async (
     max_results: maxResults,
   });
   return response.data;
+};
+
+// Document list/persistence endpoints
+export const getDocuments = async (): Promise<DocumentListItem[]> => {
+  const response = await api.get<DocumentListItem[]>('/documents/');
+  return response.data;
+};
+
+export const loadDocument = async (contentHash: string): Promise<Document> => {
+  const response = await api.get<Document>(`/documents/${contentHash}/load`);
+  return response.data;
+};
+
+export const getAuditLog = async (contentHash: string): Promise<AuditEntry[]> => {
+  const response = await api.get<AuditEntry[]>(`/documents/${contentHash}/audit`);
+  return response.data;
+};
+
+export const deleteDocument = async (contentHash: string): Promise<void> => {
+  await api.delete(`/documents/${contentHash}`);
 };
 
 export default api;

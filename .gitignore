@@ -37,6 +37,10 @@ coverage/
 backend/uploads/*
 !backend/uploads/.gitkeep
 
+# Documents (persistent storage)
+backend/documents/*
+!backend/documents/.gitkeep
+
 # Misc
 *.bak
 *.tmp

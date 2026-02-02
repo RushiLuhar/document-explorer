@@ -36,6 +36,7 @@ class Settings(BaseSettings):
 
     # File storage
     upload_dir: Path = Path("uploads")
+    documents_dir: Path = Path("documents")
     max_upload_size: int = 50 * 1024 * 1024  # 50MB
 
     # Processing
