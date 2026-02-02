@@ -5,28 +5,23 @@ import { useQAStore } from '../store/qaStore';
 import { useMindMapStore } from '../store/mindMapStore';
 
 export function useQA() {
-  const { document, selectedNodeId } = useMindMapStore();
-  const {
-    messages,
-    addQuestion,
-    addAnswer,
-    isAsking,
-    setIsAsking,
-    searchResults,
-    setSearchResults,
-    isSearching,
-    setIsSearching,
-    isPanelOpen,
-    togglePanel,
-    setIsPanelOpen,
-  } = useQAStore();
+  // Use individual selectors to prevent unnecessary re-renders
+  const document = useMindMapStore((state) => state.document);
+  const selectedNodeId = useMindMapStore((state) => state.selectedNodeId);
+
+  // QA store - use individual selectors
+  const messages = useQAStore((state) => state.messages);
+  const isAsking = useQAStore((state) => state.isAsking);
+  const searchResults = useQAStore((state) => state.searchResults);
+  const isSearching = useQAStore((state) => state.isSearching);
+  const isPanelOpen = useQAStore((state) => state.isPanelOpen);
 
   const askMutation = useMutation({
     mutationFn: async (question: string) => {
       if (!document) throw new Error('No document loaded');
 
-      const questionId = addQuestion(question);
-      setIsAsking(true);
+      const questionId = useQAStore.getState().addQuestion(question);
+      useQAStore.getState().setIsAsking(true);
 
       const response = await askQuestion(document.id, {
         question,
@@ -36,26 +31,26 @@ export function useQA() {
       return { questionId, response };
     },
     onSuccess: ({ questionId, response }) => {
-      addAnswer(questionId, response);
-      setIsAsking(false);
+      useQAStore.getState().addAnswer(questionId, response);
+      useQAStore.getState().setIsAsking(false);
     },
     onError: () => {
-      setIsAsking(false);
+      useQAStore.getState().setIsAsking(false);
     },
   });
 
   const searchMutation = useMutation({
     mutationFn: async (query: string) => {
-      setIsSearching(true);
+      useQAStore.getState().setIsSearching(true);
       const response = await searchWeb(query);
       return response;
     },
     onSuccess: (response) => {
-      setSearchResults(response.results);
-      setIsSearching(false);
+      useQAStore.getState().setSearchResults(response.results);
+      useQAStore.getState().setIsSearching(false);
     },
     onError: () => {
-      setIsSearching(false);
+      useQAStore.getState().setIsSearching(false);
     },
   });
 
@@ -72,6 +67,14 @@ export function useQA() {
     },
     [searchMutation]
   );
+
+  const togglePanel = useCallback(() => {
+    useQAStore.getState().togglePanel();
+  }, []);
+
+  const setIsPanelOpen = useCallback((open: boolean) => {
+    useQAStore.getState().setIsPanelOpen(open);
+  }, []);
 
   return {
     messages,

@@ -6,7 +6,11 @@ import { useMindMapStore } from '../../store/mindMapStore';
 export function QAPanel() {
   const [question, setQuestion] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { selectedNodeId, nodesData } = useMindMapStore();
+
+  // Use individual selectors
+  const selectedNodeId = useMindMapStore((state) => state.selectedNodeId);
+  const nodesData = useMindMapStore((state) => state.nodesData);
+
   const {
     messages,
     isAsking,
@@ -15,7 +19,7 @@ export function QAPanel() {
     togglePanel,
   } = useQA();
 
-  const selectedNode = selectedNodeId ? nodesData.get(selectedNodeId) : null;
+  const selectedNode = selectedNodeId ? nodesData[selectedNodeId] : null;
 
   // Auto-scroll to bottom
   useEffect(() => {

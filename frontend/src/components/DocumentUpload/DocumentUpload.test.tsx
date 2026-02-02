@@ -21,7 +21,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { DocumentUpload } from './DocumentUpload';
 
 // Mock the hook
@@ -35,7 +35,6 @@ const mockUseDocumentUpload = useDocumentUpload as ReturnType<typeof vi.fn>;
 
 describe('DocumentUpload', () => {
   const mockOnDocumentReady = vi.fn();
-  const mockOnBack = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();

@@ -1,17 +1,98 @@
 @import "tailwindcss";
 
-/* React Flow base styles */
+/* Typography - DM Sans for clean, modern feel */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+:root {
+  /* Color palette - refined slate with accent colors */
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-border: #e2e8f0;
+
+  /* Node type colors - harmonious palette */
+  --node-root: #1a1a2e;
+  --node-section: #7c3aed;
+  --node-subsection: #0891b2;
+  --node-topic: #059669;
+  --node-detail: #d97706;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Full height layout */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* React Flow customizations */
+.react-flow {
+  background: transparent !important;
+}
+
 .react-flow__node {
   cursor: pointer;
 }
 
+.react-flow__node.selected {
+  z-index: 100 !important;
+}
+
+/* Edge styling - elegant curves */
 .react-flow__edge-path {
-  stroke: #94a3b8;
+  stroke: #cbd5e1;
   stroke-width: 2;
+  stroke-linecap: round;
 }
 
 .react-flow__edge.selected .react-flow__edge-path {
-  stroke: #3b82f6;
+  stroke: #94a3b8;
+  stroke-width: 2.5;
+}
+
+/* Connection line when dragging */
+.react-flow__connection-line {
+  stroke: #94a3b8;
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+}
+
+/* Hide default handles, we style them in the component */
+.react-flow__handle {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Minimap styling */
+.react-flow__minimap {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
 }
 
 /* Custom scrollbar */
@@ -21,8 +102,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -34,11 +114,54 @@
   background: #94a3b8;
 }
 
-/* Full height layout */
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
+/* Selection highlight */
+::selection {
+  background: rgba(124, 58, 237, 0.15);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid #7c3aed;
+  outline-offset: 2px;
+}
+
+button:focus-visible {
+  outline: 2px solid #7c3aed;
+  outline-offset: 2px;
+}
+
+/* Smooth transitions globally */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Prevent text selection during drag */
+.react-flow__pane {
+  user-select: none;
+}
+
+/* Animation for new nodes */
+@keyframes nodeAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Subtle pulse for loading states */
+@keyframes subtlePulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.loading-pulse {
+  animation: subtlePulse 1.5s ease-in-out infinite;
 }

@@ -6,7 +6,7 @@ import { MindMapCanvas } from './components/MindMap';
 import { QAPanel } from './components/QA';
 import { WebSearchPanel } from './components/WebSearch';
 import { Header, NodeDetailPanel } from './components/Layout';
-import { useMindMapStore } from './store/mindMapStore';
+import { mindMapActions } from './store/mindMapStore';
 import { useQAStore } from './store/qaStore';
 import { getDocuments, loadDocument } from './services/api';
 import type { DocumentListItem } from './types';
@@ -19,8 +19,6 @@ function App() {
   const [contentHash, setContentHash] = useState<string | null>(null);
   const [documents, setDocuments] = useState<DocumentListItem[]>([]);
   const [isLoadingDocument, setIsLoadingDocument] = useState(false);
-  const { reset: resetMindMap } = useMindMapStore();
-  const { clear: clearQA } = useQAStore();
 
   // Fetch documents on mount
   useEffect(() => {
@@ -74,9 +72,9 @@ function App() {
     setView('list');
     setDocumentId(null);
     setContentHash(null);
-    resetMindMap();
-    clearQA();
-  }, [resetMindMap, clearQA]);
+    mindMapActions.reset();
+    useQAStore.getState().clear();
+  }, []);
 
   const handleShowUpload = useCallback(() => {
     setView('upload');

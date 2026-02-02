@@ -1,10 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMindMapStore } from '../../store/mindMapStore';
+import { useMindMapStore, mindMapActions } from '../../store/mindMapStore';
 
 export function NodeDetailPanel() {
-  const { selectedNodeId, nodesData, setSelectedNodeId } = useMindMapStore();
+  // Use individual selectors
+  const selectedNodeId = useMindMapStore((state) => state.selectedNodeId);
+  const nodesData = useMindMapStore((state) => state.nodesData);
 
-  const selectedNode = selectedNodeId ? nodesData.get(selectedNodeId) : null;
+  const selectedNode = selectedNodeId ? nodesData[selectedNodeId] : null;
 
   if (!selectedNode) return null;
 
@@ -27,7 +29,7 @@ export function NodeDetailPanel() {
             </h3>
           </div>
           <button
-            onClick={() => setSelectedNodeId(null)}
+            onClick={() => mindMapActions.setSelectedNodeId(null)}
             className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
           >
             <svg
