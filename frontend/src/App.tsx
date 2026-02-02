@@ -9,7 +9,7 @@ import { Header, NodeDetailPanel } from './components/Layout';
 import { mindMapActions } from './store/mindMapStore';
 import { useQAStore } from './store/qaStore';
 import { getDocuments, loadDocument } from './services/api';
-import type { DocumentListItem } from './types';
+import type { Document, DocumentListItem } from './types';
 
 type AppView = 'list' | 'upload' | 'mindmap';
 
@@ -45,6 +45,7 @@ function App() {
       const doc = await loadDocument(hash);
       setDocumentId(doc.id);
       setContentHash(hash);
+      mindMapActions.setDocument(doc); // Store document for Q&A functionality
       setView('mindmap');
     } catch (err) {
       console.error('Failed to load document:', err);
@@ -53,11 +54,9 @@ function App() {
     }
   }, []);
 
-  const handleDocumentReady = useCallback(async (id: string, hash?: string) => {
-    setDocumentId(id);
-    if (hash) {
-      setContentHash(hash);
-    }
+  const handleDocumentReady = useCallback(async (doc: Document) => {
+    setDocumentId(doc.id);
+    mindMapActions.setDocument(doc); // Store document for Q&A functionality
     // Refresh documents list
     try {
       const docs = await getDocuments();

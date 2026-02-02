@@ -2,8 +2,10 @@ import { useCallback, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDocumentUpload } from '../../hooks/useDocumentUpload';
 
+import type { Document } from '../../types';
+
 interface DocumentUploadProps {
-  onDocumentReady: (documentId: string, contentHash?: string) => void;
+  onDocumentReady: (document: Document) => void;
   onBack?: () => void;
 }
 
@@ -43,7 +45,7 @@ export function DocumentUpload({ onDocumentReady, onBack }: DocumentUploadProps)
   useEffect(() => {
     if (status?.status === 'completed' && uploadedDocument && !hasCalledOnReady.current) {
       hasCalledOnReady.current = true;
-      onDocumentReady(uploadedDocument.id);
+      onDocumentReady(uploadedDocument);
     }
   }, [status?.status, uploadedDocument, onDocumentReady]);
 

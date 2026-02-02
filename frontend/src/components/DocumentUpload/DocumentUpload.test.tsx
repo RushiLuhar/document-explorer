@@ -95,10 +95,10 @@ describe('DocumentUpload', () => {
 
     rerender(<DocumentUpload onDocumentReady={mockOnDocumentReady} />);
 
-    // Should be called exactly once
+    // Should be called exactly once with the full document object
     await waitFor(() => {
       expect(mockOnDocumentReady).toHaveBeenCalledTimes(1);
-      expect(mockOnDocumentReady).toHaveBeenCalledWith('test-id');
+      expect(mockOnDocumentReady).toHaveBeenCalledWith({ id: 'test-id', status: 'completed' });
     });
 
     // Simulate multiple re-renders (this is what causes the infinite loop bug)
