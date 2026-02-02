@@ -1,0 +1,25 @@
+# FastAPI and server
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.6
+python-multipart>=0.0.9
+
+# PDF processing
+# Note: Python 3.13 support added in 1.25.4
+pymupdf>=1.26.0
+
+# Claude API (includes web search tool support)
+# Note: Python 3.13 support improved in recent versions
+anthropic>=0.76.0
+
+# Data validation
+pydantic>=2.9.2
+pydantic-settings>=2.5.2
+
+# Async support
+aiofiles>=24.1.0
+
+# CORS
+# (included in fastapi)
+
+# Development
+python-dotenv>=1.0.1
