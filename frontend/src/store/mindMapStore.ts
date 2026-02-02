@@ -7,10 +7,11 @@ interface MindMapState {
   document: Document | null;
   setDocument: (document: Document | null) => void;
 
-  // Node data from API
-  nodesData: Map<string, MindMapNode>;
+  // Node data from API - using Record instead of Map for reference stability
+  nodesData: Record<string, MindMapNode>;
   setNodeData: (nodeId: string, data: MindMapNode) => void;
   addNodesData: (nodes: MindMapNode[]) => void;
+  getNode: (nodeId: string) => MindMapNode | undefined;
 
   // React Flow state
   flowNodes: Node[];
@@ -18,20 +19,22 @@ interface MindMapState {
   setFlowNodes: (nodes: Node[]) => void;
   setFlowEdges: (edges: Edge[]) => void;
 
-  // Expanded nodes tracking
-  expandedNodes: Set<string>;
+  // Expanded nodes tracking - using Record instead of Set
+  expandedNodes: Record<string, boolean>;
   toggleNodeExpanded: (nodeId: string) => void;
+  setExpandedNodes: (nodeIds: string[]) => void;
   isNodeExpanded: (nodeId: string) => boolean;
 
   // Selected node
   selectedNodeId: string | null;
   setSelectedNodeId: (nodeId: string | null) => void;
 
-  // Loading states
+  // Loading states - using Record instead of Set
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
-  loadingNodes: Set<string>;
+  loadingNodes: Record<string, boolean>;
   setNodeLoading: (nodeId: string, loading: boolean) => void;
+  isNodeLoading: (nodeId: string) => boolean;
 
   // Reset
   reset: () => void;
@@ -39,13 +42,13 @@ interface MindMapState {
 
 const initialState = {
   document: null,
-  nodesData: new Map<string, MindMapNode>(),
-  flowNodes: [],
-  flowEdges: [],
-  expandedNodes: new Set<string>(),
+  nodesData: {} as Record<string, MindMapNode>,
+  flowNodes: [] as Node[],
+  flowEdges: [] as Edge[],
+  expandedNodes: {} as Record<string, boolean>,
   selectedNodeId: null,
   isLoading: false,
-  loadingNodes: new Set<string>(),
+  loadingNodes: {} as Record<string, boolean>,
 };
 
 export const useMindMapStore = create<MindMapState>((set, get) => ({
@@ -54,55 +57,75 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
   setDocument: (document) => set({ document }),
 
   setNodeData: (nodeId, data) => {
-    set((state) => {
-      const newNodesData = new Map(state.nodesData);
-      newNodesData.set(nodeId, data);
-      return { nodesData: newNodesData };
-    });
+    set((state) => ({
+      nodesData: { ...state.nodesData, [nodeId]: data },
+    }));
   },
 
   addNodesData: (nodes) => {
     set((state) => {
-      const newNodesData = new Map(state.nodesData);
+      const newNodesData = { ...state.nodesData };
       nodes.forEach((node) => {
-        newNodesData.set(node.id, node);
+        newNodesData[node.id] = node;
       });
       return { nodesData: newNodesData };
     });
   },
 
+  getNode: (nodeId) => get().nodesData[nodeId],
+
   setFlowNodes: (nodes) => set({ flowNodes: nodes }),
   setFlowEdges: (edges) => set({ flowEdges: edges }),
 
   toggleNodeExpanded: (nodeId) => {
-    set((state) => {
-      const newExpanded = new Set(state.expandedNodes);
-      if (newExpanded.has(nodeId)) {
-        newExpanded.delete(nodeId);
-      } else {
-        newExpanded.add(nodeId);
-      }
-      return { expandedNodes: newExpanded };
-    });
+    set((state) => ({
+      expandedNodes: {
+        ...state.expandedNodes,
+        [nodeId]: !state.expandedNodes[nodeId],
+      },
+    }));
   },
 
-  isNodeExpanded: (nodeId) => get().expandedNodes.has(nodeId),
+  setExpandedNodes: (nodeIds) => {
+    const expanded: Record<string, boolean> = {};
+    nodeIds.forEach((id) => {
+      expanded[id] = true;
+    });
+    set({ expandedNodes: expanded });
+  },
+
+  isNodeExpanded: (nodeId) => !!get().expandedNodes[nodeId],
 
   setSelectedNodeId: (nodeId) => set({ selectedNodeId: nodeId }),
 
   setIsLoading: (loading) => set({ isLoading: loading }),
 
   setNodeLoading: (nodeId, loading) => {
-    set((state) => {
-      const newLoadingNodes = new Set(state.loadingNodes);
-      if (loading) {
-        newLoadingNodes.add(nodeId);
-      } else {
-        newLoadingNodes.delete(nodeId);
-      }
-      return { loadingNodes: newLoadingNodes };
-    });
+    set((state) => ({
+      loadingNodes: {
+        ...state.loadingNodes,
+        [nodeId]: loading,
+      },
+    }));
   },
+
+  isNodeLoading: (nodeId) => !!get().loadingNodes[nodeId],
 
   reset: () => set(initialState),
 }));
+
+// Stable action getters - use these to avoid subscription issues
+export const mindMapActions = {
+  setDocument: (doc: Document | null) => useMindMapStore.getState().setDocument(doc),
+  addNodesData: (nodes: MindMapNode[]) => useMindMapStore.getState().addNodesData(nodes),
+  setFlowNodes: (nodes: Node[]) => useMindMapStore.getState().setFlowNodes(nodes),
+  setFlowEdges: (edges: Edge[]) => useMindMapStore.getState().setFlowEdges(edges),
+  toggleNodeExpanded: (nodeId: string) => useMindMapStore.getState().toggleNodeExpanded(nodeId),
+  setExpandedNodes: (nodeIds: string[]) => useMindMapStore.getState().setExpandedNodes(nodeIds),
+  setSelectedNodeId: (nodeId: string | null) => useMindMapStore.getState().setSelectedNodeId(nodeId),
+  setNodeLoading: (nodeId: string, loading: boolean) => useMindMapStore.getState().setNodeLoading(nodeId, loading),
+  reset: () => useMindMapStore.getState().reset(),
+  getNode: (nodeId: string) => useMindMapStore.getState().nodesData[nodeId],
+  isExpanded: (nodeId: string) => !!useMindMapStore.getState().expandedNodes[nodeId],
+  isLoading: (nodeId: string) => !!useMindMapStore.getState().loadingNodes[nodeId],
+};

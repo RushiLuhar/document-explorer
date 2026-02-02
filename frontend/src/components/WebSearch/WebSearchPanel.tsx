@@ -7,9 +7,12 @@ export function WebSearchPanel() {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const { searchResults, isSearching, handleSearch } = useQA();
-  const { selectedNodeId, nodesData } = useMindMapStore();
 
-  const selectedNode = selectedNodeId ? nodesData.get(selectedNodeId) : null;
+  // Use individual selectors
+  const selectedNodeId = useMindMapStore((state) => state.selectedNodeId);
+  const nodesData = useMindMapStore((state) => state.nodesData);
+
+  const selectedNode = selectedNodeId ? nodesData[selectedNodeId] : null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
