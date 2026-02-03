@@ -10,6 +10,7 @@ export interface MindMapNodeData extends MindMapNodeType {
   color: string;
   onExpand?: (nodeId: string) => void;
   onClick?: (nodeId: string) => void;
+  onOpenChat?: (nodeId: string) => void;
 }
 
 interface MindMapNodeProps {
@@ -29,6 +30,7 @@ function MindMapNodeComponent({ data, id }: MindMapNodeProps) {
     key_concepts,
     onExpand,
     onClick,
+    onOpenChat,
   } = data;
 
   // Subscribe to selection state directly from store
@@ -296,6 +298,38 @@ function MindMapNodeComponent({ data, id }: MindMapNodeProps) {
           />
         )}
       </motion.div>
+
+      {/* Chat button - appears when selected */}
+      <AnimatePresence>
+        {isSelected && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenChat?.(id);
+            }}
+            className="absolute -bottom-3 -right-3 w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg flex items-center justify-center z-10"
+            title="Ask about this topic"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
+            </svg>
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Connection handle - outgoing */}
       {has_children && (

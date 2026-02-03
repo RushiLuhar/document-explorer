@@ -31,10 +31,28 @@ async def ask_question(document_id: UUID, request: QARequest):
     context_nodes = []
 
     if request.context_node_id:
-        # Use specific node and its children as context
+        # Use specific node, its parents (for hierarchy), and children as context
         if request.context_node_id in nodes_store:
             node = nodes_store[request.context_node_id]
+
+            # Collect parent nodes for hierarchical context (root -> ... -> parent)
+            parent_nodes = []
+            current = node
+            while current.parent_id:
+                parent_id_str = str(current.parent_id)
+                if parent_id_str in nodes_store:
+                    parent_nodes.append(nodes_store[parent_id_str])
+                    current = nodes_store[parent_id_str]
+                else:
+                    break
+
+            # Add parents in order from root to immediate parent
+            parent_nodes.reverse()
+            context_nodes.extend(parent_nodes)
+
+            # Add the selected node itself
             context_nodes.append(node)
+
             # Add children for more context
             for child_id in node.children_ids:
                 child_id_str = str(child_id)

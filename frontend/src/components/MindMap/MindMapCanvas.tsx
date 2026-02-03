@@ -15,6 +15,7 @@ import '@xyflow/react/dist/style.css';
 import { MindMapNode } from './MindMapNode';
 import { MindMapControls } from './MindMapControls';
 import { useMindMap } from '../../hooks/useMindMap';
+import { useQAStore } from '../../store/qaStore';
 
 interface MindMapCanvasProps {
   documentId: string;
@@ -54,6 +55,14 @@ function MindMapCanvasInner({ documentId }: MindMapCanvasProps) {
     handleNodeExpandRef.current(nodeId);
   }, []);
 
+  // Open chat panel when clicking the chat button on a node
+  const stableOnOpenChat = useCallback((nodeId: string) => {
+    // First select the node (to set context)
+    handleNodeClickRef.current(nodeId);
+    // Then open the QA panel
+    useQAStore.getState().setIsPanelOpen(true);
+  }, []);
+
   // Node types - stable reference
   const nodeTypes: NodeTypes = useMemo(
     () => ({ mindMapNode: MindMapNode }) as NodeTypes,
@@ -78,11 +87,12 @@ function MindMapCanvasInner({ documentId }: MindMapCanvasProps) {
         isLoading: !!loadingNodes[node.id],
         onExpand: stableOnExpand,
         onClick: stableOnClick,
+        onOpenChat: stableOnOpenChat,
       },
     }));
 
     setNodes(newNodes);
-  }, [flowNodes, expandedNodes, loadingNodes, stableOnExpand, stableOnClick, setNodes]);
+  }, [flowNodes, expandedNodes, loadingNodes, stableOnExpand, stableOnClick, stableOnOpenChat, setNodes]);
 
   // Sync edges when flowEdges change
   const prevFlowEdgesRef = useRef<typeof flowEdges | null>(null);
@@ -121,6 +131,7 @@ function MindMapCanvasInner({ documentId }: MindMapCanvasProps) {
           isLoading: !!loadingNodes[node.id],
           onExpand: stableOnExpand,
           onClick: stableOnClick,
+          onOpenChat: stableOnOpenChat,
         },
       }));
       setNodes(resetNodes);
@@ -128,7 +139,7 @@ function MindMapCanvasInner({ documentId }: MindMapCanvasProps) {
     setTimeout(() => {
       fitView({ padding: 0.15, duration: 300 });
     }, 50);
-  }, [expandedNodes, loadingNodes, stableOnExpand, stableOnClick, setNodes, fitView]);
+  }, [expandedNodes, loadingNodes, stableOnExpand, stableOnClick, stableOnOpenChat, setNodes, fitView]);
 
   if (isLoading) {
     return (
